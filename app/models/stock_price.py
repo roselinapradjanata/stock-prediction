@@ -1,15 +1,16 @@
 from app import db
 
 
-class Stock(db.Model):
-    __tablename__ = 'stocks'
+class StockPrice(db.Model):
+    __tablename__ = 'stock_prices'
 
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String, nullable=False)
-    name = db.Column(db.String, nullable=False)
-    listing_date = db.Column(db.Date, nullable=False)
-    outstanding_shares = db.Column(db.Integer, nullable=False)
-    prices = db.relationship('StockPrice', backref='stock', lazy=True)
+    stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    close = db.Column(db.Float, nullable=False)
+    open = db.Column(db.Float, nullable=False)
+    high = db.Column(db.Float, nullable=False)
+    low = db.Column(db.Float, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
