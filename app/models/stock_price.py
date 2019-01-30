@@ -1,11 +1,11 @@
-from app import db
+from app.extensions import db
 
 
 class StockPrice(db.Model):
     __tablename__ = 'stock_prices'
 
     id = db.Column(db.Integer, primary_key=True)
-    stock_id = db.Column(db.Integer, db.ForeignKey('stock.id'), nullable=False)
+    stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
     date = db.Column(db.Date, nullable=False)
     close = db.Column(db.Float, nullable=False)
     open = db.Column(db.Float, nullable=False)

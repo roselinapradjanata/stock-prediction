@@ -1,10 +1,8 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from app.routes import stock
 
-db = SQLAlchemy()
-migrate = Migrate()
+from app.extensions import db, migrate
+from app.routes import stock
+from app.models import Stock, StockPrice
 
 
 def create_app():
