@@ -9,7 +9,12 @@ class Stock(db.Model):
     name = db.Column(db.String, nullable=False)
     listing_date = db.Column(db.Date, nullable=False)
     outstanding_shares = db.Column(db.BigInteger, nullable=False)
-    prices = db.relationship('StockPrice', backref='stock', lazy=True)
+    scrape_id = db.Column(db.Integer, nullable=True)
+
+    daily_prices = db.relationship('StockDailyPrice', backref='stock', lazy=True)
+    weekly_prices = db.relationship('StockWeeklyPrice', backref='stock', lazy=True)
+    monthly_prices = db.relationship('StockMonthlyPrice', backref='stock', lazy=True)
+
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
