@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: aad31b4e66fc
+Revision ID: 77eca4285850
 Revises: 2e51ad87f32b
-Create Date: 2019-02-10 18:15:18.692934
+Create Date: 2019-02-10 20:56:55.158609
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'aad31b4e66fc'
+revision = '77eca4285850'
 down_revision = '2e51ad87f32b'
 branch_labels = None
 depends_on = None
@@ -22,10 +22,10 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('stock_id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
-    sa.Column('close', sa.Float(), nullable=False),
-    sa.Column('open', sa.Float(), nullable=False),
-    sa.Column('high', sa.Float(), nullable=False),
-    sa.Column('low', sa.Float(), nullable=False),
+    sa.Column('close', sa.Integer(), nullable=False),
+    sa.Column('open', sa.Integer(), nullable=False),
+    sa.Column('high', sa.Integer(), nullable=False),
+    sa.Column('low', sa.Integer(), nullable=False),
     sa.Column('volume', sa.BigInteger(), nullable=False),
     sa.Column('change', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -37,10 +37,10 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('stock_id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
-    sa.Column('close', sa.Float(), nullable=False),
-    sa.Column('open', sa.Float(), nullable=False),
-    sa.Column('high', sa.Float(), nullable=False),
-    sa.Column('low', sa.Float(), nullable=False),
+    sa.Column('close', sa.Integer(), nullable=False),
+    sa.Column('open', sa.Integer(), nullable=False),
+    sa.Column('high', sa.Integer(), nullable=False),
+    sa.Column('low', sa.Integer(), nullable=False),
     sa.Column('volume', sa.BigInteger(), nullable=False),
     sa.Column('change', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -52,10 +52,10 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('stock_id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
-    sa.Column('close', sa.Float(), nullable=False),
-    sa.Column('open', sa.Float(), nullable=False),
-    sa.Column('high', sa.Float(), nullable=False),
-    sa.Column('low', sa.Float(), nullable=False),
+    sa.Column('close', sa.Integer(), nullable=False),
+    sa.Column('open', sa.Integer(), nullable=False),
+    sa.Column('high', sa.Integer(), nullable=False),
+    sa.Column('low', sa.Integer(), nullable=False),
     sa.Column('volume', sa.BigInteger(), nullable=False),
     sa.Column('change', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
