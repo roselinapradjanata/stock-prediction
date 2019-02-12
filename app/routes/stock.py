@@ -10,8 +10,8 @@ from app.extensions import scheduler
 
 stock = Blueprint('stock', __name__)
 
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown())
+# scheduler.start()
+# atexit.register(lambda: scheduler.shutdown())
 
 
 @stock.route('/scrape/prices/<stock_code>')
@@ -61,7 +61,6 @@ def scrape_stock_prices(stock_code):
 
 
 @scheduler.scheduled_job('interval', days=1)
-# @scheduler.scheduled_job('interval', seconds=30)
 def scrape_all_stock_prices():
     print('Daily scheduler start')
 
@@ -123,7 +122,7 @@ def scrape_daily_prices(stock):
 
 
 @scheduler.scheduled_job('interval', weeks=1)
-# @stock.route('/scrape/stocks')
+@stock.route('/scrape/stocks')
 def scrape_stocks():
     print('Weekly scheduler start')
 
@@ -150,13 +149,16 @@ def scrape_stocks():
         stock_list += data['data']
 
     insert_or_update_stocks(stock_list)
+    insert_or_update_scrape_id()
 
-    print('Weekly scheduler start')
+    print('Weekly scheduler end')
     # return jsonify(stock_list)
 
 
 def insert_or_update_stocks(stock_list):
-    for stock_data in stock_list:
+    print('Stock list update start')
+
+    for idx, stock_data in enumerate(stock_list):
         stock = Stock.query.filter_by(code=stock_data['Code']).first()
 
         if stock:
@@ -164,40 +166,21 @@ def insert_or_update_stocks(stock_list):
             stock.listing_date = stock_data['ListingDate']
             stock.outstanding_shares = stock_data['Shares']
             stock.save()
-            print('Updated stock %s' % (stock_data['Code']))
+            print('Updated stock %s (%d/%d)' % (stock_data['Code'], idx + 1, len(stock_list)))
         else:
             Stock(code=stock_data['Code'],
                   name=stock_data['Name'],
                   listing_date=stock_data['ListingDate'],
-                  outstanding_shares=stock_data['Shares'],
-                  scrape_id=get_scrape_id(stock_data['Code'])).create()
-            print('Inserted stock %s' % (stock_data['Code']))
+                  outstanding_shares=stock_data['Shares']).create()
+            print('Inserted stock %s (%d/%d)' % (stock_data['Code'], idx + 1, len(stock_list)))
 
     print('Stock list updated on %s' % (str(datetime.now())))
 
 
-def get_scrape_id(stock_code):
-    url = 'https://www.investing.com/search'
-    headers = {
-        'user-agent': 'Chrome/71.0.3578.98'
-    }
-    payload = {
-        'q': stock_code
-    }
+def insert_or_update_scrape_id():
+    print('Stock scrape id update start')
 
-    r = requests.get(url=url, params=payload, headers=headers)
-    soup = BeautifulSoup(r.text, 'html.parser')
-
-    search_results = soup.find('div', class_='searchSectionMain').find_all('a')
-    href = [a['href'] for a in search_results
-            if a.find('span', class_='second').text == stock_code
-            and a.find('span', class_='fourth').text == 'Stock - Jakarta  equities']
-
-    return scrape_info(href[0]) if href else None
-
-
-def scrape_info(sub_url):
-    url = 'https://www.investing.com' + sub_url + '-historical-data'
+    url = 'https://www.investing.com/equities/indonesia'
     headers = {
         'user-agent': 'Chrome/71.0.3578.98'
     }
@@ -205,13 +188,22 @@ def scrape_info(sub_url):
     r = requests.get(url=url, headers=headers)
     soup = BeautifulSoup(r.text, 'html.parser')
 
-    info = soup.find(string=re.compile("histDataExcessInfo")).replace(' ', '').replace('\n', '')
-    params = info[info.find("{") + 1:info.find("}")].split(',')
+    stock_list = soup.find(id='cross_rate_markets_stocks_1').find('tbody').find_all('tr')
 
-    # scripts = soup.find_all('script')
-    # info = scripts[27].text.replace(' ', '').replace('\n', '')
-    # params = info[info.find("{") + 1:info.find("}")].split(',')
+    for idx, stock_data in enumerate(stock_list):
+        href = stock_data.find('a')['href']
+        scrape_id = int(stock_data.find_all('span')[1]['data-id'])
 
-    curr_id = params[0].split(':')[1]
+        url = 'https://www.investing.com' + href
 
-    return curr_id
+        r = requests.get(url=url, headers=headers)
+        soup = BeautifulSoup(r.text, 'html.parser')
+
+        code = soup.title.text.split(' | ')[0]
+        stock = Stock.query.filter_by(code=code).first()
+        if stock:
+            stock.scrape_id = scrape_id
+            stock.save()
+            print('Updated scrape id for stock %s (%d/%d)' % (code, idx + 1, len(stock_list)))
+
+    print('Stock scrape id updated on %s' % (str(datetime.now())))
