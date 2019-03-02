@@ -1,8 +1,8 @@
 from app.extensions import db
 
 
-class StockDailyPrice(db.Model):
-    __tablename__ = 'stock_daily_prices'
+class StockPrice(db.Model):
+    __tablename__ = 'stock_prices'
 
     id = db.Column(db.Integer, primary_key=True)
     stock_id = db.Column(db.Integer, db.ForeignKey('stocks.id'), nullable=False)
@@ -12,7 +12,6 @@ class StockDailyPrice(db.Model):
     high = db.Column(db.Integer, nullable=False)
     low = db.Column(db.Integer, nullable=False)
     volume = db.Column(db.BigInteger, nullable=False)
-    change = db.Column(db.Float, nullable=False)
 
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
