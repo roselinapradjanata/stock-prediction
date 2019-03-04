@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 0830dd896f30
+Revision ID: b33865bff339
 Revises: 
-Create Date: 2019-03-02 10:24:39.595249
+Create Date: 2019-03-02 12:35:39.287851
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0830dd896f30'
+revision = 'b33865bff339'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,6 @@ def upgrade():
     op.create_table('indexes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('code', sa.String(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
@@ -44,7 +43,7 @@ def upgrade():
     sa.Column('open', sa.Integer(), nullable=False),
     sa.Column('high', sa.Integer(), nullable=False),
     sa.Column('low', sa.Integer(), nullable=False),
-    sa.Column('volume', sa.BigInteger(), nullable=False),
+    sa.Column('volume', sa.BigInteger(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['index_id'], ['indexes.id'], ),

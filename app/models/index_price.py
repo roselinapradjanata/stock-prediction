@@ -11,7 +11,7 @@ class IndexPrice(db.Model):
     open = db.Column(db.Integer, nullable=False)
     high = db.Column(db.Integer, nullable=False)
     low = db.Column(db.Integer, nullable=False)
-    volume = db.Column(db.BigInteger, nullable=False)
+    volume = db.Column(db.BigInteger, nullable=True)
 
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())

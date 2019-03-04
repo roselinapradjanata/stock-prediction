@@ -6,7 +6,6 @@ class Index(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String, nullable=False)
-    name = db.Column(db.String, nullable=False)
     daily_prices = db.relationship('IndexPrice', backref='index', lazy=True)
 
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
