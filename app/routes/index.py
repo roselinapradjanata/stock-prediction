@@ -1,48 +1,80 @@
 from flask import Blueprint, jsonify
-from bs4 import BeautifulSoup
-from datetime import datetime
-import requests
+from urllib.parse import urlencode
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
-from app.models import Index
+from app.models import Index, IndexPrice, ProcessedIndexPrice
 
 index = Blueprint('index', __name__)
 
 
-@index.route('/scrape/index')
+@index.route('/scrape/index/prices')
 def scrape_all_index_prices():
-    print('Index list update start')
+    indexes = Index.query.all()
 
-    url = 'https://www.investing.com/indices/indonesia-indices'
-    headers = {
-        'user-agent': 'Chrome/71.0.3578.98'
+    for index in indexes:
+        scrape_daily_prices(index)
+
+
+def scrape_daily_prices(index):
+    print('Scraping index %s' % index.code)
+    latest_price = IndexPrice.query.join(Index).filter(Index.code == index.code).order_by(IndexPrice.date.desc()).first()
+
+    start_date = (datetime.combine(latest_price.date, datetime.min.time()) + timedelta(days=1) if latest_price else datetime(2000, 1, 1))
+    end_date = datetime.now()
+
+    url = 'https://quotes.wsj.com/index/XX/' + index.code + '/historical-prices/download'
+    payload = {
+        'num_rows': (end_date - start_date).days,
+        'range_days': (end_date - start_date).days,
+        'startDate': start_date.strftime('%Y-%m-%d'),
+        'endDate': end_date.strftime('%Y-%m-%d')
     }
 
-    r = requests.get(url=url, headers=headers)
-    soup = BeautifulSoup(r.text, 'html.parser')
+    index_csv = pd.read_csv(url + '?' + urlencode(payload), sep=', ', engine='python')
+    index_csv.columns = map(str.lower, index_csv.columns)
+    index_csv['date'] = pd.to_datetime(index_csv['date'])
 
-    index_list = soup.find(id='cr1').find('tbody').find_all('tr')
+    index_prices = index_csv.to_dict(orient='records')
 
-    for idx, index_data in enumerate(index_list):
-        href = index_data.find('a')['href']
-        scrape_id = int(index_data.find_all('span')[1]['data-id'])
+    for index_price in index_prices:
+        index.daily_prices.append(IndexPrice(**index_price))
+    index.save()
 
-        url = 'https://www.investing.com' + href
 
-        r = requests.get(url=url, headers=headers)
-        soup = BeautifulSoup(r.text, 'html.parser')
+@index.route('/preprocess/index')
+def preprocess():
+    index = Index.query.filter_by(code='LQ45').first()
+    latest_price = ProcessedIndexPrice.query.join(Index).filter(Index.code == index.code).order_by(ProcessedIndexPrice.date.desc()).first()
 
-        title = soup.title.text
-        code = title[title.find("(") + 1:title.find(")")]
-        name = title.split(' Index ')[0]
+    start_date = (datetime.combine(latest_price.date, datetime.min.time()) + timedelta(days=1) if latest_price else datetime(2000, 1, 1)).strftime('%Y-%m-%d')
+    end_date = datetime.now().strftime('%Y-%m-%d')
 
-        index = Index.query.filter_by(code=code).first()
-        if index:
-            index.scrape_id = scrape_id
-            index.save()
-            print('Updated index %s (%d/%d)' % (code, idx + 1, len(index_list)))
-        else:
-            Index(code=code, name=name, scrape_id=scrape_id).create()
-            print('Inserted index %s (%d/%d)' % (code, idx + 1, len(index_list)))
+    index_prices = IndexPrice.query.join(Index).filter(Index.code == 'LQ45', IndexPrice.date >= start_date, IndexPrice.date <= end_date).order_by(IndexPrice.date)
 
-    print('Index list updated on %s' % (str(datetime.now())))
-    return 'Finished'
+    dataframe = pd.read_sql(index_prices.statement, index_prices.session.bind)
+    index_prices = dataframe[['close']].values
+    print(index_prices)
+
+    from sklearn.preprocessing import MinMaxScaler
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    index_prices = scaler.fit_transform(index_prices)
+
+    look_back = 3
+    train_x, train_y = create_dataset(index_prices, look_back)
+
+    train_x = np.reshape(train_x, (train_x.shape[0], 1, train_x.shape[1]))
+
+    print(train_x)
+
+    return 'asdasd'
+
+
+def create_dataset(dataset, look_back=1):
+    data_X, data_Y = [], []
+    for i in range(len(dataset)-look_back):
+        a = dataset[i:(i+look_back), 0]
+        data_X.append(a)
+        data_Y.append(dataset[i + look_back, 0])
+    return np.array(data_X), np.array(data_Y)
