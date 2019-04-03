@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import requests
 import re

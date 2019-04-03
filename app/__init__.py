@@ -1,7 +1,7 @@
 from flask import Flask
 
 from app.extensions import db, migrate, scheduler
-from app.routes import stock, index
+from app.routes import stock, index, preprocessor
 
 
 def create_app():
@@ -13,5 +13,6 @@ def create_app():
 
     app.register_blueprint(stock)
     app.register_blueprint(index)
+    app.register_blueprint(preprocessor)
 
     return app
