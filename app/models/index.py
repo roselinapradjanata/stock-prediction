@@ -7,7 +7,7 @@ class Index(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String, nullable=False)
     daily_prices = db.relationship('IndexPrice', backref='index', lazy=True)
-    processed_daily_prices = db.relationship('ProcessedIndexPrice', backref='index', lazy=True)
+    model_updated_at = db.Column(db.Date)
 
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
