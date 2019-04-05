@@ -10,6 +10,7 @@ preprocessor = Blueprint('preprocessor', __name__)
 
 @preprocessor.route('/preprocessor/index')
 def preprocess():
+    print('Start Preprocessing')
     index = Index.query.filter_by(code='LQ45').first()
     latest_price = index.model_updated_at
 
@@ -28,6 +29,7 @@ def preprocess():
     x_train, y_train = create_dataset(dataset, look_back)
     x_train = np.reshape(x_train, (x_train.shape[0], 1, x_train.shape[1]))
 
+    print('Finish Preprocessing')
     return x_train, y_train
 
 
