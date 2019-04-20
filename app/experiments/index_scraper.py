@@ -7,8 +7,18 @@ from app.models import Index, IndexPrice
 
 def start_index_scraper():
     print('Index scraper scheduler start')
+    scrape_index()
     scrape_all_index_prices()
     print('Index scraper scheduler end')
+
+
+def scrape_index():
+    index_list = ['LQ45']
+    for idx, index_code in enumerate(index_list):
+        index = Index.query.filter_by(code=index_code).first()
+        if not index:
+            Index(code=index_code).create()
+            print('Inserted index %s (%d/%d)' % (index_code, idx + 1, len(index_list)))
 
 
 def scrape_all_index_prices():
@@ -16,14 +26,14 @@ def scrape_all_index_prices():
 
     indexes = Index.query.all()
 
-    for index in indexes:
+    for idx, index in enumerate(indexes):
+        print('Scraping index %s (%d/%d)' % (index.code, idx + 1, len(indexes)))
         scrape_daily_prices(index)
 
     print('Index price updated on %s' % (str(datetime.now())))
 
 
 def scrape_daily_prices(index):
-    print('Scraping index %s' % index.code)
     latest_price = IndexPrice.query.join(Index).filter(Index.code == index.code).order_by(IndexPrice.date.desc()).first()
 
     start_date = (datetime.combine(latest_price.date, datetime.min.time()) + timedelta(days=1) if latest_price else datetime(2000, 1, 1))

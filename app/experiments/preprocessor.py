@@ -1,41 +1,42 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from datetime import datetime, timedelta
+
 from app.models import Index, IndexPrice
 
 
-def process_raw_data(index_code):
+def process_raw_train_data(index_code, train_split):
     dataframe = query_dataframe(index_code)
     dataset = dataframe[['close']].values
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
 
-    look_back = 3
-    x_train, y_train = create_dataset(dataset, look_back)
-    x_train = np.reshape(x_train, (x_train.shape[0], 1, x_train.shape[1]))
+    n_steps, n_features = 3, 1
+    train_size = int(len(dataset) * train_split)
+    test_size = len(dataset) - train_size
+    train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
 
-    return x_train, y_train
+    x_train, y_train = create_train_dataset(train, n_steps)
+    x_test, y_test = create_train_dataset(test, n_steps)
+
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], n_features))
+    x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], n_features))
+
+    return x_train, y_train, x_test, y_test, scaler
 
 
-def create_dataset(dataset, look_back=1):
-    data_X, data_Y = [], []
-    for i in range(len(dataset)-look_back):
-        a = dataset[i:(i+look_back), 0]
-        data_X.append(a)
-        data_Y.append(dataset[i + look_back, 0])
-    return np.array(data_X), np.array(data_Y)
+def create_train_dataset(dataset, n_steps=1):
+    x_data, y_data = [], []
+    for i in range(len(dataset) - n_steps):
+        a = dataset[i:(i+n_steps), 0]
+        x_data.append(a)
+        y_data.append(dataset[i + n_steps, 0])
+    return np.array(x_data), np.array(y_data)
 
 
 def query_dataframe(index_code):
-    index = Index.query.filter_by(code=index_code).first()
-    latest_price = index.model_updated_at
-
-    start_date = (datetime.combine(latest_price.date, datetime.min.time()) + timedelta(days=1) if latest_price else datetime(2000, 1, 1)).strftime('%Y-%m-%d')
-    end_date = datetime.now().strftime('%Y-%m-%d')
-
-    index_prices = IndexPrice.query.join(Index).filter(Index.code == index_code, IndexPrice.date >= start_date, IndexPrice.date <= end_date).order_by(IndexPrice.date)
+    index_prices = IndexPrice.query.join(Index).filter(Index.code == index_code).order_by(IndexPrice.date)
     dataframe = pd.read_sql(index_prices.statement, index_prices.session.bind)
 
     return dataframe

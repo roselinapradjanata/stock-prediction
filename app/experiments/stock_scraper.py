@@ -16,16 +16,16 @@ def start_stock_scraper():
 def scrape_all_stock_prices():
     print('Stock price update start')
 
-    stocks = Stock.query.limit(30)
+    stocks = Stock.query.all()
 
-    for stock in stocks:
+    for idx, stock in enumerate(stocks):
+        print('Scraping stock %s (%d/%d)' % (stock.code, idx + 1, len(stocks)))
         scrape_daily_prices(stock)
 
     print('Stock price updated on %s' % (str(datetime.now())))
 
 
 def scrape_daily_prices(stock):
-    print('Scraping stock %s' % stock.code)
     latest_price = StockPrice.query.join(Stock).filter(Stock.code == stock.code).order_by(StockPrice.date.desc()).first()
 
     start_date = (datetime.combine(latest_price.date, datetime.min.time()) + timedelta(days=1) if latest_price else datetime(2000, 1, 1))

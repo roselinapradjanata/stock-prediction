@@ -3,7 +3,7 @@ from flask import Flask
 import atexit
 from app.extensions import db, migrate, scheduler
 from app.routes import stock, index, preprocessor, exp
-from app.experiments import weekly_scheduler
+from app.experiments import system_scheduler
 
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
