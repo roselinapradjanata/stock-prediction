@@ -2,7 +2,7 @@ from flask import Flask
 
 import atexit
 from app.extensions import db, migrate, scheduler
-from app.routes import stock, index, preprocessor, exp
+from app.routes import prediction
 from app.experiments import system_scheduler
 
 scheduler.start()
@@ -16,9 +16,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    app.register_blueprint(stock)
-    app.register_blueprint(index)
-    app.register_blueprint(preprocessor)
-    app.register_blueprint(exp)
+    app.register_blueprint(prediction, url_prefix='/predictions')
 
     return app
