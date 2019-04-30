@@ -32,3 +32,7 @@ def build_model(n_neurons, n_steps, n_features):
     model.add(Dense(1))
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
+
+
+def is_first_time_run():
+    return not Hyperparameter.query.all()
