@@ -16,11 +16,15 @@ def start_stock_scraper():
 def scrape_all_stock_prices():
     print('Stock price update start')
 
+    unavailable_stocks = ['BCIC']
     stocks = Stock.query.all()
 
     for idx, stock in enumerate(stocks):
-        print('Scraping stock %s (%d/%d)' % (stock.code, idx + 1, len(stocks)))
-        scrape_daily_prices(stock)
+        if stock.code not in unavailable_stocks:
+            print('Scraping stock %s (%d/%d)' % (stock.code, idx + 1, len(stocks)))
+            scrape_daily_prices(stock)
+        else:
+            print('Stock %s is not available (%d/%d)' % (stock.code, idx + 1, len(stocks)))
 
     print('Stock price updated on %s' % (str(datetime.now())))
 
