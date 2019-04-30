@@ -12,7 +12,7 @@ prediction = Blueprint('predictions', __name__)
 @prediction.route('/<stock_code>')
 def get_prediction(stock_code):
     stock = Stock.query.filter_by(code=stock_code).first()
-    if not stock:
+    if not stock or not stock.daily_prices:
         return jsonify({'code': 404, 'message': 'Stock code not found'}), 404
     scrape_daily_prices(stock)
     test_predict, y_test = test_model(stock.code)
