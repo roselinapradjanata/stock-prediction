@@ -11,7 +11,7 @@ def experiment():
     print('Experiment start')
 
     index_code = 'LQ45'
-    train_split = 0.67
+    train_split = 0.5
     x_train, y_train, x_test, y_test, scaler = process_raw_train_data(index_code, train_split)
 
     batch_sizes = [10, 15, 20, 25, 30]

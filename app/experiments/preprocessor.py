@@ -12,10 +12,9 @@ def process_raw_train_data(index_code, train_split):
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
 
-    n_steps, n_features = 3, 1
+    n_steps, n_features = 5, 1
     train_size = int(len(dataset) * train_split)
-    test_size = len(dataset) - train_size
-    train, test = dataset[0:train_size, :], dataset[train_size:len(dataset), :]
+    train, test = dataset[:train_size, :], dataset[train_size:len(dataset), :]
 
     x_train, y_train = create_train_dataset(train, n_steps)
     x_test, y_test = create_train_dataset(test, n_steps)
@@ -29,7 +28,7 @@ def process_raw_train_data(index_code, train_split):
 def create_train_dataset(dataset, n_steps=1):
     x_data, y_data = [], []
     for i in range(len(dataset) - n_steps):
-        a = dataset[i:(i+n_steps), 0]
+        a = dataset[i:(i + n_steps), 0]
         x_data.append(a)
         y_data.append(dataset[i + n_steps, 0])
     return np.array(x_data), np.array(y_data)
@@ -49,7 +48,7 @@ def process_raw_test_data(stock_code):
     scaler = MinMaxScaler(feature_range=(0, 1))
     dataset = scaler.fit_transform(dataset)
 
-    n_steps, n_features = 3, 1
+    n_steps, n_features = 5, 1
     x_test, y_test = create_test_dataset(dataset, n_steps)
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], n_features))
 
@@ -69,3 +68,13 @@ def query_stock_dataframe(stock_code):
     dataframe = pd.read_sql(stock_prices.statement, stock_prices.session.bind)
 
     return dataframe
+
+
+def process_raw_train_data_tl(normalized_dataset):
+    train = normalized_dataset[:730]
+
+    n_steps, n_features = 5, 1
+    x_train, y_train = create_train_dataset(train, n_steps)
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], n_features))
+
+    return x_train, y_train

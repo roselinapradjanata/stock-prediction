@@ -10,12 +10,12 @@ def train_model():
     print('Start training model')
 
     index_code = 'LQ45'
-    train_split = 0.67
+    train_split = 0.5
     x_train, y_train, _, _, _ = process_raw_train_data(index_code, train_split)
 
-    hyperparameter = Hyperparameter.query.join(Index).filter(Index.code == index_code).order_by(Hyperparameter.created_at.desc()).first()
+    hyperparameter = get_best_hyperparameter(index_code)
 
-    model = build_model(hyperparameter.neurons, 3, 1)
+    model = build_model(hyperparameter.neurons, 5, 1)
     model.fit(x_train, y_train, epochs=hyperparameter.epochs, batch_size=hyperparameter.batch_size, verbose=1)
     model.save(index_code + '_model.h5')
 
@@ -32,6 +32,10 @@ def build_model(n_neurons, n_steps, n_features):
     model.add(Dense(1))
     model.compile(loss='mean_squared_error', optimizer='adam')
     return model
+
+
+def get_best_hyperparameter(index_code):
+    return Hyperparameter.query.join(Index).filter(Index.code == index_code).order_by(Hyperparameter.created_at.desc()).first()
 
 
 def is_first_time_run():

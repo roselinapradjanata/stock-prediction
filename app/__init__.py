@@ -5,8 +5,8 @@ from app.extensions import db, migrate, scheduler
 from app.routes import prediction
 from app.experiments import system_scheduler
 
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown())
+# scheduler.start()
+# atexit.register(lambda: scheduler.shutdown())
 
 
 def create_app():

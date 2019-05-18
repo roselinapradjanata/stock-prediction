@@ -2,9 +2,8 @@ from flask import Blueprint, jsonify
 
 from app.models import Stock
 from app.experiments.stock_scraper import scrape_daily_prices
-from app.experiments.testing import test_model
+from app.experiments.testing import test_model, test_model_tl
 from app.experiments.evaluator import evaluate
-from app.extensions import scheduler
 
 
 prediction = Blueprint('predictions', __name__)
@@ -12,15 +11,26 @@ prediction = Blueprint('predictions', __name__)
 
 @prediction.route('/<stock_code>')
 def get_prediction(stock_code):
-    if scheduler.running:
-        return jsonify({'code': 503, 'message': 'Prediction not available currently'}), 503
-
     stock = Stock.query.filter_by(code=stock_code.upper()).first()
     if not stock or not stock.daily_prices:
         return jsonify({'code': 404, 'message': 'Stock code not found'}), 404
 
     scrape_daily_prices(stock)
     test_predict, y_test = test_model(stock.code)
+    scores = evaluate(test_predict, y_test)
+    [next_day_prediction] = test_predict[-1]
+
+    return jsonify({'prediction': str(int(next_day_prediction)), 'scores': scores})
+
+
+@prediction.route('/tl/<stock_code>')
+def get_prediction_tl(stock_code):
+    stock = Stock.query.filter_by(code=stock_code.upper()).first()
+    if not stock or not stock.daily_prices:
+        return jsonify({'code': 404, 'message': 'Stock code not found'}), 404
+
+    scrape_daily_prices(stock)
+    test_predict, y_test = test_model_tl(stock.code)
     scores = evaluate(test_predict, y_test)
     [next_day_prediction] = test_predict[-1]
 
