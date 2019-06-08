@@ -11,12 +11,13 @@ def experiment():
     print('Experiment start')
 
     index_code = 'LQ45'
-    train_split = 0.5
+    train_split = 0.67
+    n_steps, n_features = 5, 1
     x_train, y_train, x_test, y_test, scaler = process_raw_train_data(index_code, train_split)
 
-    batch_sizes = [10, 15, 20, 25, 30]
-    epochs = [150, 140, 130, 120, 110]
-    neurons = [55, 50, 45, 40, 35]
+    batch_sizes = [20, 25, 30, 35, 40]
+    epochs = [170, 160, 150, 140, 130]
+    neurons = [70, 65, 60, 55, 50]
     hyperparameters = [batch_sizes, epochs, neurons]
 
     configs = []
@@ -33,7 +34,7 @@ def experiment():
 
     for index, config in enumerate(configs):
         print('Experiment %d/%d:' % (index + 1, len(configs)), config)
-        model = build_model(n_neurons=config['neurons'], n_steps=3, n_features=1)
+        model = build_model(n_neurons=config['neurons'], n_steps=n_steps, n_features=n_features)
         model.fit(x_train, y_train, epochs=config['epochs'], batch_size=config['batch_size'], verbose=1)
         score = evaluate_mape(model, scaler, x_test, y_test)
         mape_scores.append(score)
