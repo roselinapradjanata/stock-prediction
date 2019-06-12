@@ -8,7 +8,7 @@ from .training import get_best_hyperparameter
 
 def test_model(stock_code, days):
     index_code = 'LQ45'
-    x_test, y_test, scaler = process_raw_test_data(stock_code)
+    date, x_test, y_test, scaler = process_raw_test_data(stock_code)
 
     backend.clear_session()
     model = load_model(index_code + '_model.h5')
@@ -22,12 +22,12 @@ def test_model(stock_code, days):
     y_test = scaler.inverse_transform(y_test)
     test_predict = scaler.inverse_transform(test_predict)
 
-    return test_predict, y_test
+    return date, test_predict, y_test
 
 
 def test_model_tl(stock_code, days):
     index_code = 'LQ45'
-    x_test, y_test, scaler = process_raw_test_data(stock_code)
+    date, x_test, y_test, scaler = process_raw_test_data(stock_code)
 
     backend.clear_session()
     model = load_model(index_code + '_model.h5')
@@ -46,4 +46,4 @@ def test_model_tl(stock_code, days):
     y_test = scaler.inverse_transform(y_test)
     test_predict = scaler.inverse_transform(test_predict)
 
-    return test_predict, y_test
+    return date, test_predict, y_test

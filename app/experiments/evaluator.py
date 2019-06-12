@@ -10,7 +10,12 @@ def evaluate(test_predict, y_test, days):
     mae_test_score = mean_absolute_error(y_test[n_steps:, 0], test_predict[:-days, 0])
     mape_test_score = mean_absolute_percentage_error(y_test[n_steps:, 0], test_predict[:-days, 0])
 
-    return {'rmse': '%.4f' % rmse_test_score, 'mae': '%.4f' % mae_test_score, 'mape': '%.4f%%' % mape_test_score}
+    scores = []
+    scores.append({'metric': 'RMSE', 'score': '%.4f' % rmse_test_score})
+    scores.append({'metric': 'MAE', 'score': '%.4f' % mae_test_score})
+    scores.append({'metric': 'MAPE', 'score': '%.4f%%' % mape_test_score})
+
+    return scores
 
 
 def mean_absolute_percentage_error(y_true, y_pred):

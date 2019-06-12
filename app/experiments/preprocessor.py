@@ -43,6 +43,7 @@ def query_index_dataframe(index_code):
 
 def process_raw_test_data(stock_code):
     dataframe = query_stock_dataframe(stock_code)
+    date = dataframe[['date']].values
     dataset = dataframe[['close']].values
 
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -52,7 +53,7 @@ def process_raw_test_data(stock_code):
     x_test, y_test = create_test_dataset(dataset, n_steps)
     x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], n_features))
 
-    return x_test, y_test, scaler
+    return date, x_test, y_test, scaler
 
 
 def create_test_dataset(dataset, n_steps=1):
@@ -71,7 +72,7 @@ def query_stock_dataframe(stock_code):
 
 
 def process_raw_train_data_tl(normalized_dataset):
-    train = normalized_dataset[:730]
+    train = normalized_dataset[:750]
 
     n_steps, n_features = 5, 1
     x_train, y_train = create_train_dataset(train, n_steps)

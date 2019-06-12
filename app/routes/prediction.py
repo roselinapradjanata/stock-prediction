@@ -18,11 +18,23 @@ def get_prediction(stock_code):
         return jsonify({'code': 404, 'message': 'Stock code not found'}), 404
 
     scrape_daily_prices(stock)
-    test_predict, y_test = test_model(stock.code, days)
+    date, test_predict, y_test = test_model(stock.code, days)
     scores = evaluate(test_predict, y_test, days)
-    predictions = test_predict[-days:]
 
-    return jsonify({'predictions': predictions.flatten().tolist(), 'scores': scores})
+    display_days = 30
+    date = list(map(lambda x: x.strftime('%Y-%m-%d'), date[-display_days:].flatten().tolist()))
+    prediction_date = date + ['Day %d' % (display_days + x) for x in range(1, days + 1)]
+    actual = y_test[-display_days:].flatten().tolist()
+    predicted = test_predict[-(display_days + days):].flatten().tolist()
+
+    actual = list(map(lambda x: {'date': x[0], 'price': int(x[1])}, zip(date, actual)))
+    predicted = list(map(lambda x: {'date': x[0], 'price': int(x[1])}, zip(prediction_date, predicted)))
+
+    return jsonify({
+        'scores': scores,
+        'actual': actual,
+        'predicted': predicted
+    })
 
 
 @prediction.route('/tl/<stock_code>')
@@ -34,8 +46,20 @@ def get_prediction_tl(stock_code):
         return jsonify({'code': 404, 'message': 'Stock code not found'}), 404
 
     scrape_daily_prices(stock)
-    test_predict, y_test = test_model_tl(stock.code, days)
+    date, test_predict, y_test = test_model_tl(stock.code, days)
     scores = evaluate(test_predict, y_test, days)
-    predictions = test_predict[-days:]
 
-    return jsonify({'predictions': predictions.flatten().tolist(), 'scores': scores})
+    display_days = 30
+    date = list(map(lambda x: x.strftime('%Y-%m-%d'), date[-display_days:].flatten().tolist()))
+    prediction_date = date + ['Day %d' % (display_days + x) for x in range(1, days + 1)]
+    actual = y_test[-display_days:].flatten().tolist()
+    predicted = test_predict[-(display_days + days):].flatten().tolist()
+
+    actual = list(map(lambda x: {'date': x[0], 'price': int(x[1])}, zip(date, actual)))
+    predicted = list(map(lambda x: {'date': x[0], 'price': int(x[1])}, zip(prediction_date, predicted)))
+
+    return jsonify({
+        'scores': scores,
+        'actual': actual,
+        'predicted': predicted
+    })
